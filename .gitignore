@@ -1,0 +1,15 @@
+# Data (public, downloaded via download_data.py from DANDI)
+*.nwb
+
+# Generated figures / logs
+*.pdf
+*.png
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+.DS_Store
