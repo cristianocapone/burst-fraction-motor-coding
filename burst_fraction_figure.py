@@ -205,6 +205,6 @@ ax.set_box_aspect(1)
 ax.text(-0.14, 1.04, 'D', transform=ax.transAxes,
         fontsize=13, fontweight='bold', va='bottom')
 
-plt.savefig('Fig0b.pdf', bbox_inches='tight', dpi=200)
+plt.savefig('burst_fraction_summary.pdf', bbox_inches='tight', dpi=200)
 plt.close(fig)
 print('Saved burst_fraction_summary.pdf')

@@ -7,7 +7,7 @@ Adaptation notes vs MC_Maze:
 - Direction computed as angle of target position relative to workspace centre.
 - Only 'train' split trials used.
 
-Output: Fig0b_mcrtt.pdf
+Output: mc_rtt_burst_fraction.pdf
 """
 
 import os, warnings
@@ -162,7 +162,7 @@ def despine(ax):
     ax.spines['right'].set_visible(False)
 
 # =============================================================================
-# FIGURE — single row, 4 square panels (mirrors Fig0b)
+# FIGURE — single row, 4 square panels (mirrors the main burst-fraction figure)
 # =============================================================================
 fig, axes = plt.subplots(1, 4, figsize=(14, 4),
                          gridspec_kw=dict(wspace=0.45,
@@ -225,6 +225,6 @@ despine(ax); ax.set_box_aspect(1)
 ax.text(-0.14, 1.04, 'D', transform=ax.transAxes,
         fontsize=13, fontweight='bold', va='bottom')
 
-plt.savefig('Fig0b_mcrtt.pdf', bbox_inches='tight', dpi=200)
+plt.savefig('mc_rtt_burst_fraction.pdf', bbox_inches='tight', dpi=200)
 plt.close(fig)
-print('Saved Fig0b_mcrtt.pdf')
+print('Saved mc_rtt_burst_fraction.pdf')

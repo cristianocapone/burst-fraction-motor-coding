@@ -10,7 +10,7 @@ Controls computed and printed (not shown in figure):
   - Shuffle test (200 permutations of direction labels)
   - Rate-residual burst fraction DSI (burst frac after regressing out tonic rate)
 
-Output: Fig0b.pdf
+Output: figure1_burst_fraction.pdf
 """
 
 import os, warnings
@@ -63,7 +63,7 @@ def aligned_tuning(tuning, pref_idx, n_dirs):
 # =============================================================================
 # Population-level bilinear structure (cross-validated dPCA-style analysis)
 # =============================================================================
-# The per-neuron DSI test (Fig0b C/G) shows burst fraction is more direction-
+# The per-neuron DSI test (DSI panels of figure1_burst_fraction.pdf) shows burst fraction is more direction-
 # selective than tonic rate. A skeptic could attribute this to burst spikes
 # simply being high-rate spikes. The bilinear model B(n,d) = sum_k G_k(d) Y_k(n)
 # makes a stronger, population-level prediction: the *direction-dependent* part
@@ -487,12 +487,12 @@ for row, (res, ds_label, labels) in enumerate(datasets):
             fontsize=12, fontweight='bold', va='bottom')
 
 
-plt.savefig('Fig0b.pdf', bbox_inches='tight', dpi=200)
+plt.savefig('figure1_burst_fraction.pdf', bbox_inches='tight', dpi=200)
 plt.close(fig)
-print('Saved Fig0b.pdf')
+print('Saved figure1_burst_fraction.pdf')
 
 # =============================================================================
-# FIGURE 0c  —  Population-level bilinear structure
+# SUPPLEMENTARY FIGURE — Population-level bilinear structure (figure1_population_structure.pdf)
 #   Col 0: fraction of reliable variance that is direction-dependent (rate vs frac)
 #   Col 1: cumulative cross-validated direction variance vs # components
 #          (lower-dimensional / faster-rising = more bilinear)
@@ -585,6 +585,6 @@ for row, (res, ds_label, labels) in enumerate(
     ax.text(-0.28, 1.04, labels[2], transform=ax.transAxes,
             fontsize=12, fontweight='bold', va='bottom')
 
-plt.savefig('Fig0c.pdf', bbox_inches='tight', dpi=200)
+plt.savefig('figure1_population_structure.pdf', bbox_inches='tight', dpi=200)
 plt.close(figc)
-print('Saved Fig0c.pdf')
+print('Saved figure1_population_structure.pdf')

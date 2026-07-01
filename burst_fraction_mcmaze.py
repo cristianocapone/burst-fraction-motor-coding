@@ -15,7 +15,7 @@ Pipeline
 
 Outputs
 -------
-  burst_fraction_mcmaze.pdf   — figure for the paper
+  mc_maze_burst_fraction.pdf   — figure for the paper
   burst_fraction_mcmaze.log   — statistics printed to file
 """
 
@@ -333,8 +333,8 @@ fig.suptitle(
     f'N = {good.sum()} neurons',
     fontsize=11, y=1.01)
 
-plt.savefig('burst_fraction_mcmaze.pdf', bbox_inches='tight')
+plt.savefig('mc_maze_burst_fraction.pdf', bbox_inches='tight')
 plt.close(fig)
-print('\nSaved burst_fraction_mcmaze.pdf')
+print('\nSaved mc_maze_burst_fraction.pdf')
 
 io.close()
