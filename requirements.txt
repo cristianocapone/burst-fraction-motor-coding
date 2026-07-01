@@ -1,6 +1,15 @@
+# Figure 1 (experimental data analysis)
 numpy>=1.23
 scipy>=1.9
 matplotlib>=3.6
 pynwb>=2.5
 h5py>=3.8
 dandi>=0.60
+
+# Figure 2 (two-compartment model + reacher control)
+# NOTE: gym 0.26's Reacher-v4 needs numpy<2.0 (np.bool8); the scripts add a shim,
+# but a numpy<2 environment is the tested configuration for training/eval.
+gym>=0.26
+mujoco>=2.3
+imageio>=2.25
+tqdm>=4.64
