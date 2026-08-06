@@ -1,0 +1,45 @@
+{
+  "command": "benchmark",
+  "device": "cpu",
+  "seed": 0,
+  "episode_length": 1000,
+  "gamma": 0.99,
+  "entropy_alpha": 0.2,
+  "sf_checkpoint": "models_sf_ant/sf_bank.pth",
+  "bilinear_checkpoint": "models_8dir_g_est/pretrain_final.pth",
+  "output_dir": "results_adaptation_known_frozen_gy",
+  "methods": [
+    "bilinear-rw"
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "test_angles": [
+    22.5,
+    67.5,
+    112.5,
+    157.5,
+    202.5,
+    247.5,
+    292.5,
+    337.5
+  ],
+  "test_episodes": 5,
+  "g_lr": 0.0,
+  "g_max": 10.0,
+  "actor_lr": 0.0003,
+  "actor_buffer": 100000,
+  "actor_batch": 256,
+  "actor_updates": 1,
+  "task_information": "known",
+  "reward_ridge": 0.001,
+  "deterministic": true,
+  "python": "3.12.5 (main, Aug  6 2024, 19:08:49) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "torch": "2.12.1",
+  "numpy": "1.26.4",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

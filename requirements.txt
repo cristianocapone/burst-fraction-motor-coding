@@ -14,3 +14,6 @@ mujoco>=2.3
 # optional: tqdm = training progress bar, imageio = --video rendering only
 tqdm>=4.64
 imageio>=2.25
+
+# Figure 4E-H (task-transfer cost benchmark); CPU is enough
+torch>=2.0
