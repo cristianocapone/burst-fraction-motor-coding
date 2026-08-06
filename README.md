@@ -1,8 +1,8 @@
 # Burst-fraction motor coding
 
-Code to reproduce **Figures 1 and 2** of *Burst-selective motor coding reveals a
-bilinear gating principle for adaptive control* (Capone, Falorsi, Ciardiello,
-Manneschi).
+Code to reproduce **Figures 1, 2 and 4E–H** of *Burst-selective motor coding
+inspires multiplicative gating for efficient reinforcement learning* (Capone,
+Falorsi, Ciardiello, Manneschi & Gigante).
 
 - **Figure 1** — in macaque motor cortex, **burst fraction encodes reach
   direction far more selectively than tonic spike rate**, across two independent
@@ -10,6 +10,9 @@ Manneschi).
 - **Figure 2** — a minimal **two-compartment burst-gating model** reproduces this
   coding signature and learns goal-directed reaching through context-selective
   bursting.
+- **Figure 4E–H** — sharing the same gate between actor and critic makes task
+  transfer cheap: **G×Y reaches higher reward than successor-feature transfer
+  while using 53.8× to 4095× less cumulative neural compute**.
 
 A spike is labelled a *burst spike* if its inter-spike interval to the preceding
 spike is below 10 ms; for each neuron we compare the direction selectivity of the
@@ -22,7 +25,8 @@ pip install -r requirements.txt
 ```
 
 Figure 1 needs `numpy/scipy/matplotlib/pynwb/h5py/dandi`.
-Figure 2 additionally needs `gym`, `mujoco`, `imageio`, `tqdm`. Note that gym's
+Figure 2 additionally needs `gym`, `mujoco`, `imageio`, `tqdm`.
+Figure 4E–H additionally needs `torch` (CPU is enough). Note that gym's
 `Reacher-v4` requires `numpy < 2.0` (the scripts include a `np.bool8` shim, but a
 numpy-1.x environment is the tested configuration for training and evaluation).
 
@@ -63,13 +67,32 @@ p_burst = < p_s(V_s) * p_d(V_d) >,   p_s = sigma((V_s-theta_s)/beta_s),   p_d = 
 
 Because the two factors multiply, `p_burst` is high only when both compartments
 are driven at the same time — a multiplicative gate `G_k(g) * Y_k(s)`. The motor
-command is linear in `p_burst`, and weights are learned online with a three-factor
-(reward-modulated Hebbian) rule.
+command is linear in `p_burst` (`mu = 7 * p_burst - 1`), and weights are learned
+online with a three-factor (reward-modulated Hebbian) rule; only the goal-specific
+readouts are trained, the recurrent reservoir stays frozen.
 
-The figure (3x3) shows: the neuron and its bilinear gate (A-C), reaching
-performance (D-F), and that the model reproduces the cortical burst-fraction code
-— ISI structure, sharp burst-fraction tuning, and DSI dominance over tonic rate
-(G-I, cf. Fig. 1D-K).
+The task: one episode is 400 steps split into four 100-step blocks. Each block
+picks one of the four cardinal targets (radius 0.19, random order), re-poses the
+arm folded at the centre and moves the target. Reward is
+`-distance - 0.005*|torque|^2 - 0.008*|joint velocity|^2`.
+
+### Panels
+
+| | | |
+|---|---|---|
+| **A** two-compartment neuron sketch | **B** `V_s` traces for apical-only / basal-only / both | **C** phase diagram of the product gate |
+| **D** learning curve | **E** context switch at 1500 ms | **F** best-5/20 eval trajectories per goal |
+| **G** rate tuning heatmap | **H** burst-fraction tuning heatmap | **I** DSI scatter (91% above diagonal) |
+
+Panels A–C, E and G–I are standalone two-compartment simulations run by the
+figure script. Panel D reads the training learning curve and panel F the per-goal
+evaluation.
+
+As disclosed in Methods ("Burst-fraction coding analysis"), panels G/H/I add small
+measurement-like noise and a minority of weakly burst-selective units **to the
+displayed normalised response matrices only**; the underlying two-compartment
+simulations (`_pop_bf` / `_pop_rate` in the script) are unchanged and can be
+analysed directly for the noise-free result.
 
 ### Reproduce the figure from the provided data
 
@@ -77,17 +100,95 @@ The trained checkpoint and precomputed data are included, so the figure builds
 without retraining:
 
 ```bash
-python burst_fraction_model.py     # writes figure2_model.pdf (= Figure 2)
+python scripts/make_figure2.py     # writes figure2_model.pdf (= Figure 2)
 ```
 
 ### Regenerate the data from scratch (optional)
 
 ```bash
-python train_reacher.py            # trains; writes reacher_checkpoint.pickle
-                                   #  + reacher_learning_curve.npy
-python eval_reacher.py             # writes reacher_eval_trajectories.pickle
-python burst_fraction_model.py     # rebuilds Figure 2 from the fresh data
+python scripts/train.py --episodes 50000 --outdir .   # reacher_checkpoint.pickle
+                                                      #  + reacher_learning_curve.npy
+python scripts/eval_policy.py                         # reacher_eval_trajectories.pickle
+python scripts/make_figure2.py                        # rebuilds Figure 2
 ```
+
+Training reaches an average episode reward of about **-60** (from about -95 at
+episode 0); evaluation reproduces the per-goal rewards quoted in Fig. 2F
+(+X ~ -10, -X ~ -19, +Y ~ -9, -Y ~ -20). `scripts/train.py --resume --ckpt
+reacher_checkpoint.pickle` continues from the shipped checkpoint (the
+noise/torque schedules resume at the right episode; new files are written to
+`--outdir`, never back onto the checkpoint they were loaded from).
+
+### Model code (`reacher_burst/`)
+
+| Module | Contents |
+|--------|----------|
+| `config.py`   | every hyper-parameter and the exploration/torque schedules |
+| `burst.py`    | two-compartment burst neuron, product gate, three-factor rule, `mu` calibration |
+| `network.py`  | `GOAL_GRADED` recurrent reservoir (frozen trunk) |
+| `agent.py`    | reservoir + per-goal readouts + burst sub-populations |
+| `envs.py`     | `Reacher-v4` wrapper: cardinal targets, arm re-posing, reward |
+| `rollout.py`  | one 4-goal episode → `EpisodeTrace` (shared by training, evaluation and figures) |
+| `evaluate.py` | per-goal evaluation → the panel F data |
+| `train.py`    | training loop |
+| `figures.py`  | training-diagnostics figure |
+| `render.py`   | optional video: MuJoCo frame next to live burst traces |
+| `optimizer.py`| Adam |
+
+`scripts/make_figure2.py` imports its model constants from `reacher_burst.config`,
+so the figure and the training/evaluation code cannot drift apart.
+
+Library use:
+
+```python
+from reacher_burst import make_env, run_episode
+from reacher_burst import checkpoint as ckpt
+from reacher_burst.burst import calibrate_offset
+
+p_rest, mu_offset = calibrate_offset()
+agent = ckpt.load_agent('reacher_checkpoint.pickle', mu_offset)
+trace = run_episode(make_env(), agent, episode_idx=49900, learn=False)
+print(trace.r_tot, trace.dist.mean())
+```
+
+`run_episode` returns an `EpisodeTrace` with `r_tot`, `positions`, `dist`,
+`bf_log` (p_burst), `mu_log`, `goal_of_step` and the full `Vs / Vd / spk / brst`
+arrays of shape `(steps x 15, num_g, N_B)`.
+
+---
+
+## Figure 4E–H — task-transfer cost
+
+Everything for this figure lives in [`fig4_transfer/`](fig4_transfer) (see its
+README for the full protocol).
+
+The MuJoCo Ant is pretrained on eight directions and evaluated on the eight
+interleaved unseen directions (22.5° offsets, five seeds). Every method receives
+the same descriptor `(cos theta, sin theta)`; the comparison isolates what each
+one has to *compute* to turn that descriptor into behaviour. G×Y maps it once
+through a `Linear(2,8)` encoder and then freezes the gate and all weights;
+SF-GPI evaluates a bank of eight source policies; SF-actor fine-tunes a
+77,072-parameter MLP through the frozen successor-feature value envelope.
+
+```bash
+python fig4_transfer/make_figure4.py        # panels + merged table
+python fig4_transfer/summarize_transfer.py  # paper-ready numbers and prose
+```
+
+Episode 5, mean ± SEM over five seeds (directions averaged within seed):
+
+| | reward / step | cumulative GMAC | model time (s) | gradient steps |
+|---|---|---|---|---|
+| **G×Y**  | 4.102 ± 0.101 | 0.38 ± 0.01 | 1.85 ± 0.10 | 0 |
+| SF-GPI   | 1.788 ± 0.140 | 20.43 ± 0.77 | 4.73 ± 0.18 | 0 |
+| SF-actor | 1.611 ± 0.106 | 1553.71 ± 36.40 | 12.06 ± 0.30 | 2,990 ± 70 |
+
+**Note.** The published panels merge two benchmark runs: the G×Y rows come from
+the frozen-gate run (`--g-lr 0`, `results/known_frozen_gy`) and the baseline rows
+from `results/known`. The successor-feature methods never read the gate, so their
+rows are identical in both; `make_figure4.py` verifies the metadata of both runs
+before merging. Retraining is optional — the SF expert bank and the pretrained
+bilinear checkpoint are included.
 
 ---
 
@@ -100,21 +201,24 @@ python burst_fraction_model.py     # rebuilds Figure 2 from the fresh data
 | `burst_fraction_mcrtt.py`    | `mc_rtt_burst_fraction.pdf` | MC\_RTT analysis. |
 | `burst_fraction_figure.py`   | `burst_fraction_summary.pdf` | Alternative summary layout. |
 | `download_data.py`           | `mc_maze_train.nwb`, `mc_rtt_train.nwb` | Fetch both datasets from DANDI. |
-| `burst_fraction_model.py`    | `figure2_model.pdf` | **Fig. 2.** Two-compartment model figure (builds from the provided data). |
-| `train_reacher.py`           | `reacher_checkpoint.pickle`, `reacher_learning_curve.npy` | Train the burst-gating agent on the 4-goal reacher task. |
-| `eval_reacher.py`            | `reacher_eval_trajectories.pickle`, `figure2_eval_trajectories.pdf` | Evaluate the checkpoint; best-of-N trajectories per goal. |
+| `scripts/make_figure2.py`    | `figure2_model.pdf` | **Fig. 2.** Two-compartment model figure (builds from the provided data). |
+| `scripts/train.py`           | `reacher_checkpoint.pickle`, `reacher_learning_curve.npy`, `reacher_training_progress.png` | Train the burst-gating agent on the 4-goal reacher task. |
+| `scripts/eval_policy.py`     | `reacher_eval_trajectories.pickle` | Evaluate the checkpoint; best-of-20 trajectories per goal (panel F). |
+| `scripts/make_figure.py`     | `reacher_training_progress.png` | Training diagnostics for one episode (not a paper figure). |
+| `fig4_transfer/make_figure4.py` | `fig4_transfer/results/figure4/adaptation_compute.pdf` | **Fig. 4E–H.** Merges the two transfer runs and renders the four panels. |
+| `fig4_transfer/benchmark_transfer.py` | `adaptation_results.csv`, `metadata.json` | Run the transfer benchmark (`benchmark`), train the SF experts (`train-sf`), plot one run (`plot`). |
+| `fig4_transfer/summarize_transfer.py` | `known_adaptation_numbers.csv`, `known_adaptation_paper_text.md` | Paper-ready numbers table and prose. |
 
-### Data files (included, for Fig. 2)
+### Data files (included)
 
 | File | Description |
 |------|-------------|
-| `reacher_checkpoint.pickle`        | Trained network weights. |
-| `reacher_learning_curve.npy`       | 100-episode running-mean reward (panel D). |
-| `reacher_eval_trajectories.pickle` | Best-of-20 evaluation fingertip trajectories per goal (panel F). |
-
-### Model dependencies
-
-`goal.py` (recurrent reservoir `GOAL_GRADED`), `optimizer.py` (Adam), `utils.py`.
+| `reacher_checkpoint.pickle`        | Fig. 2. Trained network weights. |
+| `reacher_learning_curve.npy`       | Fig. 2. 100-episode running-mean reward (panel D). |
+| `reacher_eval_trajectories.pickle` | Fig. 2. Best-of-20 evaluation fingertip trajectories per goal (panel F). |
+| `fig4_transfer/checkpoints/sf_bank.pth` | Fig. 4E–H. Eight successor-feature source experts. |
+| `fig4_transfer/checkpoints/pretrain_final.pth` | Fig. 4E–H. Pretrained bilinear G×Y actor/critic. |
+| `fig4_transfer/results/known*/` | Fig. 4E–H. The two benchmark runs (CSV + metadata). |
 
 ## Analysis summary
 
