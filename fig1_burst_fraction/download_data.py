@@ -6,11 +6,15 @@ Both datasets are openly available from the DANDI Archive:
   - MC_Maze  (dandiset 000128, monkey Jenkins, Stanford; delayed centre-out reaching)
   - MC_RTT   (dandiset 000129, monkey Indy, UCSF;   self-paced random-target reaching)
 
-Files are saved to the working directory under the names expected by the analysis
-scripts: mc_maze_train.nwb and mc_rtt_train.nwb. Each is several hundred MB / tens of
+Files are saved next to this script, under the names the analysis scripts expect:
+mc_maze_train.nwb and mc_rtt_train.nwb. Each is several hundred MB / tens of
 MB; the download runs once and is then cached.
 """
+from pathlib import Path
+
 from dandi.dandiapi import DandiAPIClient
+
+HERE = Path(__file__).resolve().parent
 
 DATASETS = [
     # (dandiset, asset path within dandiset, local filename)
@@ -22,8 +26,8 @@ DATASETS = [
 
 
 def fetch(dandiset, asset_path, out):
-    import os
-    if os.path.exists(out):
+    out = str(HERE / out)          # the analysis scripts chdir here
+    if Path(out).exists():
         print(f'  [cached] {out}')
         return
     print(f'Downloading dandiset {dandiset}: {asset_path}')
