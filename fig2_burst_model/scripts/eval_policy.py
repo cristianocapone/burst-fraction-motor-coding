@@ -13,6 +13,7 @@ matplotlib.use('Agg')
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / 'data'
 sys.path.insert(0, str(ROOT))
 
 from reacher_burst import checkpoint as ckpt        # noqa: E402
@@ -25,8 +26,8 @@ from reacher_burst.envs import make_env             # noqa: E402
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--ckpt', default=str(ROOT / C.CKPT_FILE))
-    p.add_argument('--out', default=str(ROOT / C.EVAL_FILE))
+    p.add_argument('--ckpt', default=str(DATA / C.CKPT_FILE))
+    p.add_argument('--out', default=str(DATA / C.EVAL_FILE))
     p.add_argument('--n-eval', type=int, default=20, help='episodes per goal')
     p.add_argument('--k-best', type=int, default=5, help='trajectories highlighted per goal')
     p.add_argument('--steps', type=int, default=C.GOAL_BLOCK, help='steps per episode')

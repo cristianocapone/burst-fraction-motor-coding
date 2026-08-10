@@ -19,6 +19,7 @@ matplotlib.use('Agg')
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / 'data'
 sys.path.insert(0, str(ROOT))
 
 from reacher_burst import checkpoint as ckpt        # noqa: E402
@@ -33,8 +34,8 @@ from reacher_burst.train import CURVE_STRIDE        # noqa: E402
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--ckpt', default=str(ROOT / C.CKPT_FILE))
-    p.add_argument('--traj', default=str(ROOT / C.CURVE_FILE),
+    p.add_argument('--ckpt', default=str(DATA / C.CKPT_FILE))
+    p.add_argument('--traj', default=str(DATA / C.CURVE_FILE),
                    help='learning-curve .npy for the top-left panel')
     p.add_argument('--out', default=C.TRAIN_FIG)
     p.add_argument('--seed', type=int, default=None)

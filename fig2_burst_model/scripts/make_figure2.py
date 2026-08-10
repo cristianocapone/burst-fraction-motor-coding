@@ -15,13 +15,15 @@ produced by `scripts/eval_policy.py`:
                             →  reacher_checkpoint.pickle
     scripts/eval_policy.py  →  reacher_eval_trajectories.pickle  (panel F)
 
+The shipped copies of those files live in fig2_burst_model/data/.
+
 Model constants come from `reacher_burst.config`, so this figure and the
 training/evaluation code can never drift apart.
 
 Usage
 -----
     python scripts/make_figure2.py
-    python scripts/make_figure2.py --data-dir . --out figure2_model.pdf
+    python scripts/make_figure2.py --data-dir data --out figure2_model.pdf
 """
 import argparse
 import pickle
@@ -41,7 +43,7 @@ from reacher_burst import config as C          # noqa: E402
 
 _p = argparse.ArgumentParser(description=__doc__,
                              formatter_class=argparse.RawDescriptionHelpFormatter)
-_p.add_argument('--data-dir', default=str(ROOT),
+_p.add_argument('--data-dir', default=str(ROOT / 'data'),
                 help='directory holding the learning curve + evaluation pickle')
 _p.add_argument('--curve', default=None,
                 help=f'learning-curve .npy (default: <data-dir>/{C.CURVE_FILE})')
