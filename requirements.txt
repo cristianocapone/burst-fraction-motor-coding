@@ -17,3 +17,7 @@ imageio>=2.25
 
 # Figure 4E-H (task-transfer cost benchmark); CPU is enough
 torch>=2.0
+
+# Revision analyses (revision_neural/: Indy sessions streamed from Zenodo; revision_rl/: Ant-v4)
+requests>=2.28
+gymnasium[mujoco]>=0.29

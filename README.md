@@ -23,10 +23,16 @@ tonic firing rate against that of the burst fraction.
 One folder per figure, each self-contained and documented by its own README:
 
 ```
-fig1_burst_fraction/   Fig. 1  — macaque motor-cortex analysis (data from DANDI)
+fig1_burst_fraction/   Fig. 1 (submitted version) — macaque motor-cortex analysis (data from DANDI)
 fig2_burst_model/      Fig. 2  — two-compartment burst-gating model + reacher control
 fig4_transfer/         Fig. 4E-H — task-transfer cost vs successor features
+revision_neural/       revised Fig. 1, Fig. 2G-I, Supplementary Text S1-S3 and S9:
+                       single-compartment null, five monkeys, M1 vs PMd, direct fit of the gate
+revision_rl/           Supplementary Text S5-S7: force field, gate formation, cold start
 ```
+
+The two `revision_*` folders hold the analyses added in the revision, each with its own README that maps
+every script to the figure or Supplementary section it produces.
 
 Scripts resolve their own paths, so they can be run from anywhere in the repo.
 
