@@ -22,3 +22,6 @@ dandi000688_*_cache/
 *.mat
 logs/
 revision_neural/*.nwb
+
+# Input data of revision_rl/make_fig4_final.py (vector source of Fig. 4B-D)
+!revision_rl/data/trajectories_comparison.pdf

@@ -564,7 +564,7 @@ def plot_results(args):
     present = set(np.atleast_1d(data["method"]).tolist())
     methods = [method for method in preferred if method in present]
     colors = {"bilinear-rw": "#1a6fbe", "sf-gpi": "#2ca02c", "sf-actor": "#cc2222"}
-    short = {"bilinear-rw": "G×Y", "sf-gpi": "SF-GPI", "sf-actor": "SF + actor PI"}
+    short = {"bilinear-rw": "G-shared", "sf-gpi": "SF-GPI", "sf-actor": "SF + actor PI"}
     fig, axes = plt.subplots(1, 4, figsize=(15, 3.6))
     panel_labels = "ABCD"
     zero_shot_reference = None

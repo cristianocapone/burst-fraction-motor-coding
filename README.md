@@ -28,13 +28,17 @@ fig2_burst_model/      Fig. 2  — two-compartment burst-gating model + reacher 
 fig4_transfer/         Fig. 4E-H — task-transfer cost vs successor features
 revision_neural/       revised Fig. 1, Fig. 2G-I, Supplementary Text S1-S3 and S9:
                        single-compartment null, five monkeys, M1 vs PMd, direct fit of the gate
-revision_rl/           Supplementary Text S5-S7: force field, gate formation, cold start
+revision_rl/           revised Fig. 4 (force-field row I-L) and Supplementary Text S5-S7:
+                       force field, gate formation, cold start
 ```
 
 The two `revision_*` folders hold the analyses added in the revision, each with its own README that maps
 every script to the figure or Supplementary section it produces.
 
 Scripts resolve their own paths, so they can be run from anywhere in the repo.
+
+In the revised paper the gated model with one gate for actor and critic is called **G-shared**
+("G×Y" in the submitted version and in `fig4_transfer/`), and the model with separate gates **G-independent**.
 
 ## Install
 

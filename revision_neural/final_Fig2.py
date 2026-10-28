@@ -13,7 +13,7 @@ Row 2:  G-I matched-noise model analysis
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-BCI = os.path.dirname(os.path.abspath(__file__))
+BCI = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'burst_coincidence_investigation')
 sys.path.insert(0, BCI)
 
 import numpy as np, pickle
@@ -471,14 +471,15 @@ def draw_mini_pyramidal_neuron(ax, x, y, mode='all_black', scale_x=8.5, scale_y=
                 color=c_proc, lw=lw, solid_capstyle='round', zorder=7, clip_on=False)
 
 # ══════════════════════════════════════════════════════════════════════════════
-FIG_W, FIG_H = 6.5, 7.85
+FIG_W, FIG_H = 6.5, 7.85 - 0.50
+DX_TOP = 0.50       # gap left by the removed legend of B
 DY = 0.35            # rows 0-1 shifted down by DY relative to the 8.2-in draft
 fig = plt.figure(figsize=(FIG_W, FIG_H))
 gs_outer = gridspec.GridSpec(
     1, 3, figure=fig,
     width_ratios=[0.80, 1.05, 1.30],
     wspace=0.45,
-    left=0.09, right=0.98, top=(7.85-DY)/FIG_H, bottom=(6.40-DY)/FIG_H)
+    left=0.09, right=0.98, top=(7.85-DY-DX_TOP)/FIG_H, bottom=(6.40-DY-DX_TOP)/FIG_H)
 
 def _inch_axes(x0, y0, w, h):
     """Axes placed in absolute inches (from bottom-left of the figure)."""
@@ -515,17 +516,16 @@ draw_mini_pyramidal_neuron(ax_B, _icon_x, 2*LANE_GAP + 1.10, mode='all_black')
 
 ax_B.set_xlim(-36, T_B); ax_B.set_ylim(-0.9, 3*LANE_GAP)
 ax_B.set_yticks([]); ax_B.set_xlabel('Time (ms)', fontsize=11)
-ax_B.set_ylabel(r'$V_s$', fontsize=11)
-ax_B.set_title('Membrane potential',
+ax_B.set_ylabel('')
+_lane_lab = ['apical\nonly', 'basal\nonly', 'both']
+ax_B.set_yticks([i * LANE_GAP + 1.10 for i in range(3)])
+ax_B.set_yticklabels(_lane_lab, fontsize=9.5, linespacing=0.9)
+for _t, (_, _, _, _c) in zip(ax_B.get_yticklabels(), CASES):
+    _t.set_color(_c)
+ax_B.tick_params(axis='y', length=0, pad=1)
+ax_B.set_title(r'Membrane potential $V_s$',
                fontsize=11.5, fontweight='bold', pad=3)
 from matplotlib.lines import Line2D
-ax_B.legend(
-    handles=[Line2D([],[],color=c,lw=2.2) for _,_,_,c in CASES],
-    labels=[f'{CASE_LABELS_B[i]}  ($p_b={_sigm_prob(CASES[i][1]-V_THRESH_B,BETA_S_B)*_sigm_prob(CASES[i][2]-V_BURST_B,BETA_D_B):.2f}$)'
-            for i in range(3)],
-    fontsize=9.5, framealpha=.92, edgecolor='#ccc',
-    loc='upper center', bbox_to_anchor=(0.5, -0.27),
-    ncol=1, handlelength=1.8)
 ax_B.spines['top'].set_visible(False); ax_B.spines['right'].set_visible(False)
 ax_B.text(-0.14, 1.01, 'B', transform=ax_B.transAxes, **PANEL_KW)
 
